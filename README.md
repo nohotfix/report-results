@@ -54,6 +54,24 @@ That's it. The commit is auto-detected (`GITHUB_SHA`), the disposition prints in
 - **Idempotent** — re-running a workflow does not double-apply or corrupt state.
 - **Exact-match** — results bind to the exact `commit` + `environment`; a result for a different commit/environment never satisfies a release gate.
 
+## The `environment` label
+
+`environment` names **which deployment target** your test run is about (`production`, `staging`, …). It is half of how NoHotfix matches a result — results match on **`(ci_key, commit, environment)`**, all exact — so it scopes the release gate: results reported against `staging` never satisfy a `production` release gate (no stale or cross-environment greens).
+
+**Where it comes from:** in NoHotfix you define environments under **Settings → Environments**, and a **run** is given one of them when it's started. The string you pass here must **exactly match that run's environment** (case-sensitive) for the results to feed that run's Go/No-Go gate. A run with no environment set is never matched.
+
+```yaml
+with:
+  environment: production   # must equal the run's environment, character-for-character
+```
+
+Two cases worth distinguishing:
+
+- **Test "last run" + Recent CI results timeline + readiness** — the environment is simply recorded with the result; it shows up there regardless.
+- **A run's Go/No-Go gate** — requires the exact `environment` (and commit) of an in-progress run.
+
+Tip: standardize on one spelling (e.g. always `production`) so your CI step and your runs never drift. There is no default — you must set it, precisely so a result can't silently satisfy the wrong environment's gate.
+
 ## Pull requests
 
 On `pull_request`, `GITHUB_SHA` is the ephemeral merge commit. If you label runs by the PR head, pass it explicitly:
