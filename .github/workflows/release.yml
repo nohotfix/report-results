@@ -1,0 +1,45 @@
+name: Release
+
+# Build-on-release: dist/ is NOT committed to main. When a maintainer publishes a GitHub Release with
+# a semver tag (e.g. v1.2.0), this workflow builds the bundle, attaches it to the release tag, and
+# moves the major tag (v1) to that commit. The only human action is cutting the release — the rest is
+# deterministic. Runs IN this repo, so the built-in GITHUB_TOKEN suffices (no cross-repo credential).
+#
+# To release:  gh release create v1.2.0 --generate-notes   (or the "Draft a new release" button)
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build # produces dist/index.js
+
+      - name: Attach dist to the release tag and move the major tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          MAJOR="${TAG%%.*}"   # v1.2.0 -> v1
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f dist
+          git commit -m "build: bundle dist for ${TAG}"
+          git tag -f "${TAG}"
+          git tag -f "${MAJOR}"
+          git push origin -f "refs/tags/${TAG}"
+          git push origin -f "refs/tags/${MAJOR}"
+          echo "Published ${TAG} and moved ${MAJOR} (with bundled dist)." >> "$GITHUB_STEP_SUMMARY"

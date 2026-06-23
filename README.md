@@ -69,3 +69,27 @@ with:
 with:
   api-url: http://localhost:3001   # or your staging host
 ```
+
+## Development & releasing (maintainers)
+
+This repository is the **source of truth** for the Action.
+
+```sh
+npm install
+npm run typecheck && npm run lint && npm test
+npm run build      # bundles src/main.ts -> dist/index.js via @vercel/ncc
+```
+
+- **`dist/` is not committed to `main`** — it is built and attached to each release tag (build-on-release). `main` holds source only; customers reference published tags (`@v1`), never `@main`.
+- **CI** (`.github/workflows/ci.yml`) runs typecheck + lint + tests + a build, plus a self-test that proves the Action stays green against an unreachable API.
+
+### Cutting a release
+
+A release is **human-initiated**; the workflow does the mechanical part — no manual `dist` commit, no cross-repo steps:
+
+```sh
+gh release create v1.1.0 --generate-notes
+```
+
+`.github/workflows/release.yml` (on a published release) builds `dist/`, attaches it to the release tag, and moves the major tag (`v1`) to it. It runs inside this repo with the built-in `GITHUB_TOKEN`.
+

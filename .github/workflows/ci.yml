@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build # verify the ncc bundle compiles (dist is built on release, not committed)
+
+      # Self-test: an unreachable API is an operational error; with the default (fail-on-error: false)
+      # the step MUST stay green — the core guarantee that the Action never reddens a build for a
+      # NoHotfix-side reason. Runs the just-built dist via `uses: ./`.
+      - name: Make a JUnit fixture
+        run: echo '<testsuites><testsuite name="self-test"><testcase name="smoke [nhf:self.test.smoke]"/></testsuite></testsuites>' > /tmp/results.xml
+      - name: Action stays green on an unreachable API
+        uses: ./
+        with:
+          token: dummy-token
+          junit: /tmp/results.xml
+          environment: ci
+          commit: ${{ github.sha }}
+          api-url: http://127.0.0.1:9

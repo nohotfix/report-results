@@ -1,0 +1,11 @@
+{
+  "name": "ci-fixture-playwright",
+  "private": true,
+  "description": "Standalone example: Playwright → JUnit → NoHotfix (not a workspace member).",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

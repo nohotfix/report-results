@@ -1,0 +1,15 @@
+{
+  "name": "ci-fixture-jest",
+  "private": true,
+  "description": "Standalone example: Jest → JUnit (jest-junit) → NoHotfix (not a workspace member).",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "reporters": ["default", ["jest-junit", { "outputName": "results.xml" }]]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0"
+  }
+}

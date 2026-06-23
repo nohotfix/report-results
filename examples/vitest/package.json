@@ -1,0 +1,11 @@
+{
+  "name": "ci-fixture-vitest",
+  "private": true,
+  "description": "Standalone example: Vitest → JUnit → NoHotfix (not a workspace member).",
+  "scripts": {
+    "test": "vitest run --reporter=junit --outputFile=results.xml"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

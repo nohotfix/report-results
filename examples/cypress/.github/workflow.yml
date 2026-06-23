@@ -1,0 +1,19 @@
+# Customer-facing reference — drop into .github/workflows/ in your repo.
+name: Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npx cypress run # mocha-junit-reporter writes results.xml (configured in cypress.config.ts)
+      - name: Report results to NoHotfix
+        if: always()
+        uses: nohotfix/report-results@v1
+        with:
+          token: ${{ secrets.NOHOTFIX_INGEST_TOKEN }}
+          junit: results.xml
+          environment: production

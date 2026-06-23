@@ -1,0 +1,12 @@
+{
+  "name": "ci-fixture-cypress",
+  "private": true,
+  "description": "Standalone example: Cypress → JUnit (mocha-junit-reporter) → NoHotfix (not a workspace member).",
+  "scripts": {
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0",
+    "mocha-junit-reporter": "^2.2.1"
+  }
+}
