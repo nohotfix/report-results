@@ -1,0 +1,47 @@
+name: "NoHotfix — Report results"
+description: "Report automated test results (JUnit) to NoHotfix in one step. NoHotfix records what CI reported; it does not run or verify your tests."
+author: "NoHotfix"
+branding:
+  icon: check-circle
+  color: orange
+inputs:
+  token:
+    description: "NoHotfix CI ingest token. Store it as a GitHub secret."
+    required: true
+  junit:
+    description: "Path or glob to the JUnit XML report(s) to report."
+    required: true
+  environment:
+    description: "Environment label (part of the exact-match key, e.g. 'production'). Required."
+    required: true
+  commit:
+    description: "Release-candidate commit SHA. Defaults to GITHUB_SHA. For PR builds pass github.event.pull_request.head.sha."
+    required: false
+  api-url:
+    description: "NoHotfix ingest base URL. Defaults to the NoHotfix production host."
+    required: false
+  idempotency-key:
+    description: "Override the idempotency key. By default it is content-addressed per file (safe for matrix/shards and retries)."
+    required: false
+  fail-on-error:
+    description: "Fail the step on operational errors (auth/network/malformed/no-file). An unknown ci_key is never an error. Default false."
+    required: false
+    default: "false"
+  auth:
+    description: "Authentication mode. Only 'token' is supported today (OIDC-ready seam)."
+    required: false
+    default: "token"
+outputs:
+  accepted:
+    description: "Total accepted results across all submitted files."
+  ignored:
+    description: "Total ignored results (with reasons in the step summary)."
+  applied-to-library:
+    description: "Count applied to the library 'last run'."
+  applied-to-open-runs:
+    description: "Count applied to in-progress run members."
+  disposition-json:
+    description: "Aggregated disposition as JSON."
+runs:
+  using: node20
+  main: dist/index.js
